@@ -32,7 +32,7 @@ class ticketUi{
     static containerTicket(){
         return new ContainerBuilder().setAccentColor(Colors.Orange).addTextDisplayComponents(t=>t.setContent('📋 Création de Ticket'))
         .addSectionComponents(s=>s.addTextDisplayComponents(t=>t.setContent( '👮 **Contacter le staff** — Ouvre un ticket pour contacter le staff.'))
-        .setButtonAccessory(btn=>btn.setCustomId('ticket_staff').setLabel('👮 Contacter le staff').setStyle(ButtonStyle.Primary)))
+        .setButtonAccessory(btn=>btn.setCustomId('ticket_staff').setLabel('👮 Contacter le staff').setStyle(ButtonStyle.Success)))
         /**Première Séparation */
         .addSeparatorComponents(s=>s.setSpacing(SeparatorSpacingSize.Small))
         /**Deuxième Sections */
@@ -41,11 +41,11 @@ class ticketUi{
         .addSeparatorComponents(s=>s.setSpacing(SeparatorSpacingSize.Small))
         /**Troisième Sections */
         .addSectionComponents(s=>s.addTextDisplayComponents(t=>t.setContent( '📝 **Autre** — Demande générale ou autre sujet.'))
-        .setButtonAccessory(btn=>btn.setCustomId('ticket_autre').setLabel('📝 Autre').setStyle(ButtonStyle.Primary)))
+        .setButtonAccessory(btn=>btn.setCustomId('ticket_autre').setLabel('📝 Autre').setStyle(ButtonStyle.Danger)))
         .addSeparatorComponents(s=>s.setSpacing(SeparatorSpacingSize.Small))
         /**Quatrième Sections */
         .addSectionComponents(s=>s.addTextDisplayComponents(t=>t.setContent('🤝 **Partenariat** — Proposition ou demande de partenariat.'))
-        .setButtonAccessory(btn=>btn.setCustomId('ticket_partenariat').setLabel('🤝 Partenariat').setStyle(ButtonStyle.Primary)))
+        .setButtonAccessory(btn=>btn.setCustomId('ticket_partenariat').setLabel('🤝 Partenariat').setStyle(ButtonStyle.Secondary)))
         .addSeparatorComponents(s=>s.setSpacing(SeparatorSpacingSize.Small))
     }
 }
