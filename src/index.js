@@ -30,8 +30,7 @@ const ticketTypes = {
   autre: { label: 'Autre', categoryId: config.ticketCategories.autre },
   partenariat: { label: 'Partenariat', categoryId: config.ticketCategories.partenariat }
 };
-
-
+module.exports={ticketTypes}
 const ticketActionRow = (state = 'open') => {
   const row = new ActionRowBuilder();
   if (state === 'open') {

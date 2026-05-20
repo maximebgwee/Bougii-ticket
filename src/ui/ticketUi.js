@@ -1,10 +1,7 @@
 const { Colors, ContainerBuilder, SeparatorSpacingSize,ButtonStyle,ModalBuilder,TextInputBuilder,TextInputStyle,ActionRowBuilder } = require("discord.js");
-const ticketTypes = {
-  staff: { label: 'Contacter le staff', categoryId: config.ticketCategories.staff },
-  questionSab: { label: 'Question SAB', categoryId: config.ticketCategories.questionSab },
-  autre: { label: 'Autre', categoryId: config.ticketCategories.autre },
-  partenariat: { label: 'Partenariat', categoryId: config.ticketCategories.partenariat }
-};
+const {ticketTypes} = require("../index")
+
+
 class ticketUi{
     /**Gestion du modal */
     static openTicketModal = async (interaction, type) => {
