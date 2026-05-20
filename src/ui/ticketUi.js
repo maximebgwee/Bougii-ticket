@@ -1,4 +1,4 @@
-const { Colors, ContainerBuilder, SeparatorSpacingSize,ButtonStyle } = require("discord.js");
+const { Colors, ContainerBuilder, SeparatorSpacingSize,ButtonStyle,ModalBuilder,TextInputBuilder,TextInputStyle,ActionRowBuilder } = require("discord.js");
 
 class ticketUi{
     /**Gestion du modal */
