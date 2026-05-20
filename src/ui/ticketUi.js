@@ -1,4 +1,4 @@
-import { Colors, ContainerBuilder, SeparatorSpacingSize } from "discord.js";
+const { Colors, ContainerBuilder, SeparatorSpacingSize } = require("discord.js");
 
 export class ticketUi{
     /**Gestion du modal */
