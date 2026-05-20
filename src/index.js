@@ -30,10 +30,16 @@ const ticketTypes = {
 
 const buttonRows = () => [
   new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('ticket_staff').setLabel('Contacter le staff').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('ticket_questionSab').setLabel('Question SAB').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('ticket_autre').setLabel('Autre').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('ticket_partenariat').setLabel('Partenariat').setStyle(ButtonStyle.Primary)
+    new ButtonBuilder().setCustomId('ticket_staff').setLabel('👮 Contacter le staff').setStyle(ButtonStyle.Primary)
+  ),
+  new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('ticket_questionSab').setLabel('❓ Question SAB').setStyle(ButtonStyle.Primary)
+  ),
+  new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('ticket_autre').setLabel('📝 Autre').setStyle(ButtonStyle.Primary)
+  ),
+  new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('ticket_partenariat').setLabel('🤝 Partenariat').setStyle(ButtonStyle.Primary)
   )
 ];
 
@@ -145,12 +151,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await interaction.reply({
           embeds: [
             new EmbedBuilder()
-              .setTitle('Création de ticket')
-              .setDescription('Choisis ton type de ticket ci-dessous. Chaque option demandera un titre et une description détaillée.')
+              .setTitle('📋 Création de Ticket')
+              .setDescription(
+                '👮 **Contacter le staff** — Ouvre un ticket pour contacter le staff.\n\n' +
+                '❓ **Question SAB** — Pose une question à propos de SAB.\n\n' +
+                '📝 **Autre** — Demande générale ou autre sujet.\n\n' +
+                '🤝 **Partenariat** — Proposition ou demande de partenariat.'
+              )
               .setColor(0x0099ff)
           ],
-          components: buttonRows(),
-          ephemeral: true
+          components: buttonRows()
         });
       }
       return;
