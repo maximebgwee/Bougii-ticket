@@ -1,4 +1,6 @@
 const http = require('http');
+
+const { ticketUi } = require("./ui/ticketUi")
 const {
   Client,
   GatewayIntentBits,
@@ -12,7 +14,8 @@ const {
   AttachmentBuilder,
   ChannelType,
   PermissionFlagsBits,
-  Events
+  Events,
+  MessageFlags
 } = require('discord.js');
 const config = require('./config');
 require('dotenv').config();
@@ -28,20 +31,6 @@ const ticketTypes = {
   partenariat: { label: 'Partenariat', categoryId: config.ticketCategories.partenariat }
 };
 
-const buttonRows = () => [
-  new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('ticket_staff').setLabel('👮 Contacter le staff').setStyle(ButtonStyle.Primary)
-  ),
-  new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('ticket_questionSab').setLabel('❓ Question SAB').setStyle(ButtonStyle.Primary)
-  ),
-  new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('ticket_autre').setLabel('📝 Autre').setStyle(ButtonStyle.Primary)
-  ),
-  new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('ticket_partenariat').setLabel('🤝 Partenariat').setStyle(ButtonStyle.Primary)
-  )
-];
 
 const ticketActionRow = (state = 'open') => {
   const row = new ActionRowBuilder();
@@ -60,32 +49,7 @@ const ticketActionRow = (state = 'open') => {
   return [row];
 };
 
-const openTicketModal = async (interaction, type) => {
-  const modal = new ModalBuilder()
-    .setCustomId(`ticket_modal_${type}`)
-    .setTitle(`Ouvrir un ticket: ${ticketTypes[type].label}`);
 
-  const titleInput = new TextInputBuilder()
-    .setCustomId('ticket_title')
-    .setLabel('Titre du ticket')
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true)
-    .setPlaceholder('Résumé clair du problème ou de la demande');
-
-  const descriptionInput = new TextInputBuilder()
-    .setCustomId('ticket_description')
-    .setLabel('Description détaillée')
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true)
-    .setPlaceholder('Explique ton problème ou ta demande en détail');
-
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(titleInput),
-    new ActionRowBuilder().addComponents(descriptionInput)
-  );
-
-  await interaction.showModal(modal);
-};
 
 const getTicketContext = (channel) => {
   if (!channel?.topic) return null;
@@ -144,49 +108,34 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     if (interaction.isChatInputCommand()) {
       if (interaction.commandName === 'tick') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-          return interaction.reply({ content: 'Tu dois être administrateur pour utiliser cette commande.', ephemeral: true });
-        }
-
         await interaction.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle('📋 Création de Ticket')
-              .setDescription(
-                '👮 **Contacter le staff** — Ouvre un ticket pour contacter le staff.\n\n' +
-                '❓ **Question SAB** — Pose une question à propos de SAB.\n\n' +
-                '📝 **Autre** — Demande générale ou autre sujet.\n\n' +
-                '🤝 **Partenariat** — Proposition ou demande de partenariat.'
-              )
-              .setColor(0x0099ff)
-          ],
-          components: buttonRows()
+          components:[ticketUi.containerTicket()],
+          flags:MessageFlags.IsComponentsV2,
         });
       }
       return;
     }
-
     if (interaction.isButton()) {
       const customId = interaction.customId;
 
       if (customId.startsWith('ticket_') && customId !== 'ticket_close' && customId !== 'ticket_open' && customId !== 'ticket_delete' && customId !== 'ticket_claim') {
         const type = customId.replace('ticket_', '');
         if (!ticketTypes[type]) {
-          return interaction.reply({ content: 'Type de ticket inconnu.', ephemeral: true });
+          return interaction.reply({ content: 'Type de ticket inconnu.', flags:MessageFlags.Ephemeral });
         }
-        return openTicketModal(interaction, type);
+        return ticketUi.openTicketModal(interaction, type);
       }
 
       const channel = interaction.channel;
       const context = getTicketContext(channel);
       if (!context) {
-        return interaction.reply({ content: 'Ce canal n’est pas un ticket valide.', ephemeral: true });
+        return interaction.reply({ content: 'Ce canal n’est pas un ticket valide.', flags:MessageFlags.Ephemeral});
       }
 
       if (customId === 'ticket_close') {
         const authorCanClose = interaction.user.id === context.userId || interaction.member.roles.cache.has(config.staffRoleId);
         if (!authorCanClose) {
-          return interaction.reply({ content: 'Tu n’as pas la permission de fermer ce ticket.', ephemeral: true });
+          return interaction.reply({ content: 'Tu n’as pas la permission de fermer ce ticket.', flags:MessageFlags.Ephemeral });
         }
         await channel.setTopic(`ticket-user:${context.userId} type:${context.type} status:closed`);
         await channel.send({ content: `Ticket fermé par <@${interaction.user.id}>.` });
@@ -196,7 +145,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (customId === 'ticket_open') {
         const authorCanOpen = interaction.user.id === context.userId || interaction.member.roles.cache.has(config.staffRoleId);
         if (!authorCanOpen) {
-          return interaction.reply({ content: 'Tu n’as pas la permission de rouvrir ce ticket.', ephemeral: true });
+          return interaction.reply({ content: 'Tu n’as pas la permission de rouvrir ce ticket.', flags:MessageFlags.Ephemeral});
         }
         await channel.setTopic(`ticket-user:${context.userId} type:${context.type} status:open`);
         await channel.send({ content: `Ticket rouvert par <@${interaction.user.id}>.` });
@@ -205,18 +154,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (customId === 'ticket_claim') {
         if (!interaction.member.roles.cache.has(config.staffRoleId)) {
-          return interaction.reply({ content: 'Seuls les membres du staff peuvent claim ce ticket.', ephemeral: true });
+          return interaction.reply({ content: 'Seuls les membres du staff peuvent claim ce ticket.', flags:MessageFlags.Ephemeral });
         }
         await channel.send({ content: `Ticket claimé par <@${interaction.user.id}>.` });
-        return interaction.reply({ content: 'Ticket claimé.', ephemeral: true });
+        return interaction.reply({ content: 'Ticket claimé.',flags:MessageFlags.Ephemeral });
       }
 
       if (customId === 'ticket_delete') {
         if (!interaction.member.roles.cache.has(config.staffRoleId)) {
-          return interaction.reply({ content: 'Seuls les membres du staff peuvent supprimer ce ticket.', ephemeral: true });
+          return interaction.reply({ content: 'Seuls les membres du staff peuvent supprimer ce ticket.', flags:MessageFlags.Ephemeral });
         }
 
-        await interaction.reply({ content: 'Suppression en cours, transcription en préparation...', ephemeral: true });
+        await interaction.reply({ content: 'Suppression en cours, transcription en préparation...', flags:MessageFlags.Ephemeral });
         const transcriptBuffer = await createTranscript(channel);
         const transcriptFile = new AttachmentBuilder(transcriptBuffer, { name: `${channel.name}-transcript.txt` });
 
@@ -237,23 +186,23 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const customId = interaction.customId.replace('ticket_modal_', '');
       const type = interaction.customId.replace('ticket_modal_', '');
       if (!ticketTypes[type]) {
-        return interaction.reply({ content: 'Type de ticket inconnu.', ephemeral: true });
+        return interaction.reply({ content: 'Type de ticket inconnu.', flags:MessageFlags.Ephemeral });
       }
 
       const title = interaction.fields.getTextInputValue('ticket_title');
       const description = interaction.fields.getTextInputValue('ticket_description');
       if (!title || !description) {
-        return interaction.reply({ content: 'Le titre et la description sont requis.', ephemeral: true });
+        return interaction.reply({ content: 'Le titre et la description sont requis.', flags:MessageFlags.Ephemeral });
       }
 
       const guild = interaction.guild;
       if (await hasActiveTicket(guild, interaction.user.id)) {
-        return interaction.reply({ content: 'Tu as déjà un ticket ouvert. Tu dois le fermer ou le supprimer avant d’en ouvrir un nouveau.', ephemeral: true });
+        return interaction.reply({ content: 'Tu as déjà un ticket ouvert. Tu dois le fermer ou le supprimer avant d’en ouvrir un nouveau.',flags:MessageFlags.Ephemeral});
       }
 
       const categoryId = ticketTypes[type].categoryId;
       if (!categoryId) {
-        return interaction.reply({ content: 'La catégorie du ticket n’est pas configurée.', ephemeral: true });
+        return interaction.reply({ content: 'La catégorie du ticket n’est pas configurée.', flags:MessageFlags.Ephemeral});
       }
 
       const channelName = `ticket-${type}-${interaction.user.username.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}-${interaction.user.discriminator}`;
@@ -284,14 +233,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
         components: ticketActionRow('open')
       });
 
-      return interaction.reply({ content: `Ton ticket a été créé dans ${channel}.`, ephemeral: true });
+      return interaction.reply({ content: `Ton ticket a été créé dans ${channel}.`, flags:MessageFlags.Ephemeral});
     }
   } catch (error) {
     console.error('Erreur d’interaction:', error);
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: 'Une erreur est survenue.', ephemeral: true });
+      await interaction.followUp({ content: 'Une erreur est survenue.', flags:MessageFlags.Ephemeral});
     } else {
-      await interaction.reply({ content: 'Une erreur est survenue.', ephemeral: true });
+      await interaction.reply({ content: 'Une erreur est survenue.', flags:MessageFlags.Ephemeral });
     }
   }
 });
