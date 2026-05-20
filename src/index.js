@@ -1,3 +1,4 @@
+const http = require('http');
 const {
   Client,
   GatewayIntentBits,
@@ -283,6 +284,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await interaction.reply({ content: 'Une erreur est survenue.', ephemeral: true });
     }
   }
+});
+
+const port = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+}).listen(port, () => {
+  console.log(`HTTP health check listening on port ${port}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);

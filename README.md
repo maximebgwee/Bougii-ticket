@@ -54,5 +54,7 @@ Le rôle de staff et de mention est `1504270231390916769`.
 
 - Le fichier `render.yaml` est inclus pour créer un service de type "background" sur Render.
 - Dans l'interface Render : créez un nouveau service à partir du dépôt ou utilisez le déploiement automatique, puis assignez les variables d'environnement : `DISCORD_TOKEN`, `CLIENT_ID`, `GUILD_ID` et autres nécessaires.
-- Le service utilise `npm run start`. Sur Render, le type background est recommandé pour les bots Discord (pas besoin d'un serveur HTTP). Si vous préférez un "Web Service", ajoutez un petit endpoint de santé écoutant `process.env.PORT`.
+- Le service utilise `npm run start`. Sur Render, le type `background` est recommandé pour les bots Discord (pas besoin d'un serveur HTTP).
+- Si Render est configuré en `Web Service` et affiche "no open port detected", ce dépôt gère désormais automatiquement `process.env.PORT` pour un endpoint de santé.
+- Si Render ne fournit pas `PORT`, le bot démarre quand même un petit serveur local sur `3000` pour que le processus expose un port détectable.
 
