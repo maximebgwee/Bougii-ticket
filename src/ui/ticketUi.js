@@ -1,6 +1,6 @@
 const { Colors, ContainerBuilder, SeparatorSpacingSize } = require("discord.js");
 
-export class ticketUi{
+class ticketUi{
     /**Gestion du modal */
     static openTicketModal = async (interaction, type) => {
       const modal = new ModalBuilder()
