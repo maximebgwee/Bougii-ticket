@@ -117,13 +117,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isButton()) {
       const customId = interaction.customId;
 
-      if (customId.startsWith('ticket_') && customId !== 'ticket_close' && customId !== 'ticket_open' && customId !== 'ticket_delete' && customId !== 'ticket_claim') {
         const type = customId.replace('ticket_', '');
         if (!ticketTypes[type]) {
           return interaction.reply({ content: 'Type de ticket inconnu.', flags:MessageFlags.Ephemeral });
         }
         return ticketUi.openTicketModal(interaction, type);
-      }
+      
 
       const channel = interaction.channel;
       const context = getTicketContext(channel);
