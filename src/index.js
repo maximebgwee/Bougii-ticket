@@ -1,6 +1,6 @@
 const http = require('http');
 
-const { ticketUi } = require("./ui/ticketUi")
+const { ticketUi, ticketTypes } = require("./ui/ticketUi")
 const {
   Client,
   GatewayIntentBits,
@@ -24,13 +24,6 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
-const ticketTypes = {
-  staff: { label: 'Contacter le staff', categoryId: config.ticketCategories.staff },
-  questionSab: { label: 'Question SAB', categoryId: config.ticketCategories.questionSab },
-  autre: { label: 'Autre', categoryId: config.ticketCategories.autre },
-  partenariat: { label: 'Partenariat', categoryId: config.ticketCategories.partenariat }
-};
-module.exports={ticketTypes}
 const ticketActionRow = (state = 'open') => {
   const row = new ActionRowBuilder();
   if (state === 'open') {
