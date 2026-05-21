@@ -105,6 +105,7 @@ client.once(Events.ClientReady, () => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
+    console.log(interaction.customId)
     if (interaction.isChatInputCommand()) {
       if (interaction.commandName === 'tick') {
         await interaction.reply({
